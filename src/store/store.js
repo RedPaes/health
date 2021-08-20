@@ -39,6 +39,7 @@ const feelingApiClient = new FeelingApi()
 const sleepApiClient = new SleepApi()
 const smokingApiClient = new SmokingApi()
 const activitiesApiClient = new ActivitiesApi()
+const importApiClient = new ImportApiClient()
 
 export default new Vuex.Store({
 	state: {
@@ -431,6 +432,11 @@ export default new Vuex.Store({
 			commit('activitiesDatasetsUpdate', o)
 		},
 		async activitiesDatasetsDelete({ commit, getters }, set) {
+			const o = await activitiesApiClient.deleteSet(set)
+			// console.debug('returned o', o)
+			commit('activitiesDatasetsDelete', o)
+		},
+		async triggerImport({ commit, getters }, set) {
 			const o = await activitiesApiClient.deleteSet(set)
 			// console.debug('returned o', o)
 			commit('activitiesDatasetsDelete', o)

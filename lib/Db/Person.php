@@ -120,6 +120,7 @@ class Person extends Entity implements JsonSerializable {
 		$this->addType('size','integer');
 
 		// modules
+		$this->isGetterForBoolProperty('enabledModuleWeight');
 		$this->addType('enabledModuleWeight', 'boolean');
 		$this->addType('enabledModuleBreaks', 'boolean');
 		$this->addType('enabledModuleFeeling', 'boolean');

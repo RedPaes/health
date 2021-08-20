@@ -126,6 +126,12 @@
 			@change="$store.dispatch('setValue', { key: 'enabledModuleSmoking', value: $event.target.checked })">
 			{{ t('health', 'Smoking') }}
 		</ActionCheckbox>
+		<ActionButton
+			v-if="person"
+			icon="icon-add"
+			@click="$store.dispatch('triggerImport', 71)">
+			{{ t('health', 'Import') }}
+		</ActionButton>
 	</ul>
 </template>
 

@@ -65,5 +65,8 @@ return [
 		['name' => 'activitiesdata#create',	'url' => '/activities/dataset/person/{personId}',	'verb' => 'POST'],
 		['name' => 'activitiesdata#delete',	'url' => '/activities/dataset/{id}',	'verb' => 'DELETE'],
 		['name' => 'activitiesdata#update',	'url' => '/activities/dataset/{id}',	'verb' => 'PUT'],
-    ]
+
+		// import
+		['name' => 'import#gadgetbridge',	'url' => '/import/gadgetbridge/{fileId}',	'verb' => 'POST'],
+	]
 ];

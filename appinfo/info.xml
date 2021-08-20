@@ -27,7 +27,7 @@ Health is everything.]]></description>
 	<screenshot>https://dl.datenangebot.de/nc%20health/screenshots/v1.2.x/weight%20chart%20and%20data.png</screenshot>
 	<screenshot>https://dl.datenangebot.de/nc%20health/screenshots/v1.2.x/weight%20overview.png</screenshot>
 	<dependencies>
-        <nextcloud min-version="20" max-version="21"/>
+        <nextcloud min-version="19" max-version="23"/>
     </dependencies>
     <navigations>
         <navigation>
