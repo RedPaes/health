@@ -21,7 +21,7 @@
  */
 
 import Vue from 'vue'
-import Vuex from 'vuex'
+import Vuex, { Store } from 'vuex'
 import { WeightApi } from './WeightApi'
 import { PersonApi } from './PersonApi'
 import { MeasurementApi } from './MeasurementApi'
@@ -42,7 +42,7 @@ const smokingApiClient = new SmokingApi()
 const activitiesApiClient = new ActivitiesApi()
 const importApiClient = new ImportApiClient()
 
-export default new Vuex.Store({
+export default new Store({
 	state: {
 		initialLoading: true,
 		loading: false,
@@ -57,7 +57,7 @@ export default new Vuex.Store({
 		sleepDatasets: [],
 		smokingDatasets: [],
 		activitiesDatasets: [],
-		importConfig: {}
+		importConfig: {},
 	},
 	getters: {
 		person: state => (state.persons && state.persons[state.activePersonId]) ? state.persons[state.activePersonId] : null,
@@ -237,7 +237,11 @@ export default new Vuex.Store({
 		},
 	},
 	actions: {
-		async loadPersons({ dispatch, state, commit }) {
+		async loadPersons({
+			dispatch,
+			state,
+			commit,
+		}) {
 			commit('initialLoading', true)
 			const persons = await personApiClient.load()
 			if (persons && persons.length > 0) {
@@ -249,16 +253,27 @@ export default new Vuex.Store({
 			}
 			commit('initialLoading', false)
 		},
-		setActivePerson({ dispatch, commit }, id) {
+		setActivePerson({
+			dispatch,
+			commit,
+		}, id) {
 			commit('activePersonId', id)
 			// commit('setModuleSettings', {})
 			dispatch('loadModuleContentForPerson')
 		},
-		setActiveModule({ dispatch, commit }, module) {
+		setActiveModule({
+			dispatch,
+			commit,
+		}, module) {
 			commit('activeModule', module)
 			dispatch('loadModuleContentForPerson')
 		},
-		async loadModuleContentForPerson({ getters, commit, dispatch, state }) {
+		async loadModuleContentForPerson({
+			getters,
+			commit,
+			dispatch,
+			state,
+		}) {
 			// this ist called if the active person or module changed
 			// it should load all data, that is necessary for the active module
 			commit('loading', true)
@@ -286,7 +301,11 @@ export default new Vuex.Store({
 			}
 			commit('loading', false)
 		},
-		async setValue({ commit, state, getters }, data) {
+		async setValue({
+			commit,
+			state,
+			getters,
+		}, data) {
 			// console.debug('try to update person value', data)
 			// data: {key, value, [id]}
 			const id = 'id' in data ? data.id : getters.person.id
@@ -295,11 +314,19 @@ export default new Vuex.Store({
 			commit('personUpdate', o)
 			showSuccess(t('health', 'Value successfully saved', {}))
 		},
-		async addPerson({ state, dispatch, commit }, name) {
+		async addPerson({
+			state,
+			dispatch,
+			commit,
+		}, name) {
 			const p = await personApiClient.addPerson(name)
 			commit('personsAdd', p)
 		},
-		async deletePerson({ state, dispatch, commit }, person) {
+		async deletePerson({
+			state,
+			dispatch,
+			commit,
+		}, person) {
 			const existingIndex = state.persons.findIndex(set => set.id === person.id)
 			await personApiClient.deletePerson(person.id)
 			commit('personsDelete', person)
@@ -315,19 +342,28 @@ export default new Vuex.Store({
 			commit('rWeightDatasets', datasets)
 			// console.debug('saved to store "rWeightDatasets"')
 		},
-		async rWeightDatasetsAppend({ commit, getters }, set) {
+		async rWeightDatasetsAppend({
+			commit,
+			getters,
+		}, set) {
 			// console.debug('add weight dataset', set)
 			const o = await weightApiClient.addSet(getters.person.id, set)
 			// console.debug('returned o', o)
 			commit('rWeightDatasetsAppend', o)
 		},
-		async rWeightDatasetsUpdate({ commit, getters }, set) {
+		async rWeightDatasetsUpdate({
+			commit,
+			getters,
+		}, set) {
 			console.debug('update weight dataset', set)
 			const o = await weightApiClient.updateSet(set)
 			console.debug('returned o', o)
 			commit('rWeightDatasetsUpdate', o)
 		},
-		async rWeightDatasetsDelete({ commit, getters }, set) {
+		async rWeightDatasetsDelete({
+			commit,
+			getters,
+		}, set) {
 			// console.debug('remove weight dataset', set)
 			const o = await weightApiClient.deleteSet(set)
 			// console.debug('returned o', o)
@@ -339,17 +375,26 @@ export default new Vuex.Store({
 			// console.debug('found datasets', datasets)
 			commit('measurementDatasets', datasets)
 		},
-		async measurementDatasetsAppend({ commit, getters }, set) {
+		async measurementDatasetsAppend({
+			commit,
+			getters,
+		}, set) {
 			const o = await measurementApiClient.addSet(getters.person.id, set)
 			// console.debug('returned o', o)
 			commit('measurementDatasetsAppend', o)
 		},
-		async measurementDatasetsUpdate({ commit, getters }, set) {
+		async measurementDatasetsUpdate({
+			commit,
+			getters,
+		}, set) {
 			const o = await measurementApiClient.updateSet(set)
 			// console.debug('returned o', o)
 			commit('measurementDatasetsUpdate', o)
 		},
-		async measurementDatasetsDelete({ commit, getters }, set) {
+		async measurementDatasetsDelete({
+			commit,
+			getters,
+		}, set) {
 			const o = await measurementApiClient.deleteSet(set)
 			// console.debug('returned o', o)
 			commit('measurementDatasetsDelete', o)
@@ -360,17 +405,26 @@ export default new Vuex.Store({
 			// console.debug('found datasets', datasets)
 			commit('feelingDatasets', datasets)
 		},
-		async feelingDatasetsAppend({ commit, getters }, set) {
+		async feelingDatasetsAppend({
+			commit,
+			getters,
+		}, set) {
 			const o = await feelingApiClient.addSet(getters.person.id, set)
 			// console.debug('returned o', o)
 			commit('feelingDatasetsAppend', o)
 		},
-		async feelingDatasetsUpdate({ commit, getters }, set) {
+		async feelingDatasetsUpdate({
+			commit,
+			getters,
+		}, set) {
 			const o = await feelingApiClient.updateSet(set)
 			// console.debug('returned o', o)
 			commit('feelingDatasetsUpdate', o)
 		},
-		async feelingDatasetsDelete({ commit, getters }, set) {
+		async feelingDatasetsDelete({
+			commit,
+			getters,
+		}, set) {
 			const o = await feelingApiClient.deleteSet(set)
 			// console.debug('returned o', o)
 			commit('feelingDatasetsDelete', o)
@@ -381,17 +435,26 @@ export default new Vuex.Store({
 			// console.debug('found datasets', datasets)
 			commit('sleepDatasets', datasets)
 		},
-		async sleepDatasetsAppend({ commit, getters }, set) {
+		async sleepDatasetsAppend({
+			commit,
+			getters,
+		}, set) {
 			const o = await sleepApiClient.addSet(getters.person.id, set)
 			// console.debug('returned o', o)
 			commit('sleepDatasetsAppend', o)
 		},
-		async sleepDatasetsUpdate({ commit, getters }, set) {
+		async sleepDatasetsUpdate({
+			commit,
+			getters,
+		}, set) {
 			const o = await sleepApiClient.updateSet(set)
 			// console.debug('returned o', o)
 			commit('sleepDatasetsUpdate', o)
 		},
-		async sleepDatasetsDelete({ commit, getters }, set) {
+		async sleepDatasetsDelete({
+			commit,
+			getters,
+		}, set) {
 			const o = await sleepApiClient.deleteSet(set)
 			// console.debug('returned o', o)
 			commit('sleepDatasetsDelete', o)
@@ -402,17 +465,26 @@ export default new Vuex.Store({
 			// console.debug('found datasets', datasets)
 			commit('smokingDatasets', datasets)
 		},
-		async smokingDatasetsAppend({ commit, getters }, set) {
+		async smokingDatasetsAppend({
+			commit,
+			getters,
+		}, set) {
 			const o = await smokingApiClient.addSet(getters.person.id, set)
 			// console.debug('returned o', o)
 			commit('smokingDatasetsAppend', o)
 		},
-		async smokingDatasetsUpdate({ commit, getters }, set) {
+		async smokingDatasetsUpdate({
+			commit,
+			getters,
+		}, set) {
 			const o = await smokingApiClient.updateSet(set)
 			// console.debug('returned o', o)
 			commit('smokingDatasetsUpdate', o)
 		},
-		async smokingDatasetsDelete({ commit, getters }, set) {
+		async smokingDatasetsDelete({
+			commit,
+			getters,
+		}, set) {
 			const o = await smokingApiClient.deleteSet(set)
 			// console.debug('returned o', o)
 			commit('smokingDatasetsDelete', o)
@@ -423,22 +495,34 @@ export default new Vuex.Store({
 			// console.debug('found datasets', datasets)
 			commit('activitiesDatasets', datasets)
 		},
-		async activitiesDatasetsAppend({ commit, getters }, set) {
+		async activitiesDatasetsAppend({
+			commit,
+			getters,
+		}, set) {
 			const o = await activitiesApiClient.addSet(getters.person.id, set)
 			// console.debug('returned o', o)
 			commit('activitiesDatasetsAppend', o)
 		},
-		async activitiesDatasetsUpdate({ commit, getters }, set) {
+		async activitiesDatasetsUpdate({
+			commit,
+			getters,
+		}, set) {
 			const o = await activitiesApiClient.updateSet(set)
 			// console.debug('returned o', o)
 			commit('activitiesDatasetsUpdate', o)
 		},
-		async activitiesDatasetsDelete({ commit, getters }, set) {
+		async activitiesDatasetsDelete({
+			commit,
+			getters,
+		}, set) {
 			const o = await activitiesApiClient.deleteSet(set)
 			// console.debug('returned o', o)
 			commit('activitiesDatasetsDelete', o)
 		},
-		async triggerImport({ commit, getters }, set) {
+		async triggerImport({
+			commit,
+			getters,
+		}, set) {
 			const o = await importApiClient.importGadgedbridge(set)
 			// console.debug('returned o', o)
 			commit('triggerImport', o)

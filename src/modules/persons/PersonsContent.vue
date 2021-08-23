@@ -32,7 +32,11 @@
 				</button>
 			</div>
 			<div class="col-2">
-				<p>{{ t('health', 'You can start here with giving you yourself a personal mission. Maybe you have a special target, a medical specification or a bet with your friends or partner. It could help you to describe it here. Giving yourself a bounty if you reach the targets or think about an emergency plan, if the things getting worth is also a good idea …') }}</p>
+				<p>
+					{{
+						t('health', 'You can start here with giving you yourself a personal mission. Maybe you have a special target, a medical specification or a bet with your friends or partner. It could help you to describe it here. Giving yourself a bounty if you reach the targets or think about an emergency plan, if the things getting worth is also a good idea …')
+					}}
+				</p>
 			</div>
 		</div>
 	</div>
@@ -55,61 +59,64 @@ export default {
 	},
 	methods: {
 		updateMission() {
-			this.$store.dispatch('setValue', { key: 'personalMission', value: this.$refs.mission.value })
+			this.$store.dispatch('setValue', {
+				key: 'personalMission',
+				value: this.$refs.mission.value,
+			})
 		},
 		triggerImport() {
 			this.$store.dispatch('triggerImport')
-		}
+		},
 	},
 }
 </script>
 <style lang="scss" scoped>
-	.textarea-mission {
-		// width: 67%;
-		min-height: 200px;
-	}
+.textarea-mission {
+	// width: 67%;
+	min-height: 200px;
+}
 
-	.content-wrapper-health {
-		width: 98%;
-	}
+.content-wrapper-health {
+	width: 98%;
+}
 
-	.widget {
-		border: 1px solid gray;
-		border-radius: 4px;
-		background-color: #80808026;
-		padding: 4px;
-		width: 100px;
-		margin: 10px;
-		float: left;
-	}
+.widget {
+	border: 1px solid gray;
+	border-radius: 4px;
+	background-color: #80808026;
+	padding: 4px;
+	width: 100px;
+	margin: 10px;
+	float: left;
+}
 
-	.widget h3 {
-		margin-top: 5px;
-		margin-bottom: 2px;
-		font-size: large;
-	}
+.widget h3 {
+	margin-top: 5px;
+	margin-bottom: 2px;
+	font-size: large;
+}
 
-	.widget .date {
-		color: gray;
-		font-size: 0.8em;
-		text-align: right;
-	}
+.widget .date {
+	color: gray;
+	font-size: 0.8em;
+	text-align: right;
+}
 
-	.widget span {
-		padding-left: 2px;
-		padding-right: 2px;
-	}
+.widget span {
+	padding-left: 2px;
+	padding-right: 2px;
+}
 
-	.widget .firstNumber {
-		font-weight: bold;
-		text-align: right;
-	}
+.widget .firstNumber {
+	font-weight: bold;
+	text-align: right;
+}
 
-	.widget .secondNumber {
-		text-align: right;
-	}
+.widget .secondNumber {
+	text-align: right;
+}
 
-	.clear {
-		clear: both;
-	}
+.clear {
+	clear: both;
+}
 </style>

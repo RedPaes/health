@@ -38,10 +38,11 @@ export class ImportApiClient {
 				},
 				(err) => {
 					return Promise.reject(err)
-				}
+				},
 			)
 			.catch((err) => {
 				return Promise.reject(err)
 			})
 	}
+
 }

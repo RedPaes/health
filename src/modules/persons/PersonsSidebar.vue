@@ -129,7 +129,7 @@
 		<ActionButton
 			v-if="person"
 			icon="icon-add"
-			@click="$store.dispatch('triggerImport', 71)">
+			@click="shareFromFiles()">
 			{{ t('health', 'Import') }}
 		</ActionButton>
 	</ul>
@@ -139,7 +139,16 @@
 import ActionRadio from '@nextcloud/vue/dist/Components/ActionRadio'
 import ActionCheckbox from '@nextcloud/vue/dist/Components/ActionCheckbox'
 import ActionInput from '@nextcloud/vue/dist/Components/ActionInput'
+import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
 import { mapState, mapGetters } from 'vuex'
+import { getFilePickerBuilder } from '@nextcloud/dialogs'
+
+const picker = getFilePickerBuilder(t('deck', 'File to share'))
+	.setMultiSelect(false)
+	.setModal(true)
+	.setType(1)
+	.allowDirectories()
+	.build()
 
 export default {
 	name: 'PersonsSidebar',
@@ -147,6 +156,7 @@ export default {
 		ActionCheckbox,
 		ActionRadio,
 		ActionInput,
+		ActionButton,
 	},
 	computed: {
 		...mapState(['activeModule', 'showSidebar', 'persons']),
@@ -154,44 +164,60 @@ export default {
 	},
 	methods: {
 		updateAge(e) {
-			this.$store.dispatch('setValue', { key: 'age', value: e.target[1].value })
+			this.$store.dispatch('setValue', {
+				key: 'age',
+				value: e.target[1].value,
+			})
 		},
 		updateSize(e) {
-			this.$store.dispatch('setValue', { key: 'size', value: e.target[1].value })
+			this.$store.dispatch('setValue', {
+				key: 'size',
+				value: e.target[1].value,
+			})
 		},
 		updateSex(sex) {
-			this.$store.dispatch('setValue', { key: 'sex', value: sex })
+			this.$store.dispatch('setValue', {
+				key: 'sex',
+				value: sex,
+			})
+		},
+		shareFromFiles() {
+			picker.pick()
+				.then(async(path) => {
+					console.debug(`path ${path} selected`)
+					// this.$store.dispatch('fetchAttachments')
+				})
 		},
 	},
 }
 </script>
 <style lang="scss">
-	.textarea-sidebar {
-		padding-right: 14px;
-	}
+.textarea-sidebar {
+	padding-right: 14px;
+}
 
-	textarea {
-		height: 100px;
-		width: 100%;
-	}
+textarea {
+	height: 100px;
+	width: 100%;
+}
 
-	.subli {
-		border-left: 5px solid #8080804a;
-		border-top: 5px solid #8080804a;
-		padding-left: 8px;
-	}
+.subli {
+	border-left: 5px solid #8080804a;
+	border-top: 5px solid #8080804a;
+	padding-left: 8px;
+}
 
-	li h3 {
-		border-bottom: 1px solid #80808057;
-	}
+li h3 {
+	border-bottom: 1px solid #80808057;
+}
 
-	li h3, li h4 {
-		margin-top: 20px;
-	}
+li h3, li h4 {
+	margin-top: 20px;
+}
 
-	h4 span {
-		opacity: .7;
-		font-size: 0.8em;
-		margin-left: 5px;
-	}
+h4 span {
+	opacity: .7;
+	font-size: 0.8em;
+	margin-left: 5px;
+}
 </style>
