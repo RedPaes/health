@@ -24,24 +24,147 @@ declare(strict_types=1);
 
 namespace OCA\Health\Controller;
 
+use OCA\Health\Services\ActivitiesdataService;
+use OCA\Health\Services\MeasurementdataService;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Files\File;
+use OCP\Files\IRootFolder;
 use OCP\IRequest;
 use OCP\AppFramework\Controller;
 
-class ImportController extends Controller {
+class ImportController extends Controller
+{
 
-	protected $cesService;
 	protected $userId;
-	public function __construct($appName, IRequest $request, $userId) {
+	protected $storage;
+	protected $rootFolder;
+	protected $measurementdataService;
+	protected $activityDataService;
+	public function __construct($appName,
+								IRequest $request,
+								IRootFolder $rootFolder,
+								MeasurementdataService $measurementdataService,
+								ActivitiesdataService  $activitiesdataService,
+								$userId)
+	{
 		parent::__construct($appName, $request);
 		$this->userId = $userId;
+		$this->rootFolder = $rootFolder;
+		$this->measurementdataService = $measurementdataService;
+		$this->activityDataService = $activitiesdataService;
+	}
+
+	private function getLocalFile(File $file): string
+	{
+		$useTempFile = $file->isEncrypted() || !$file->getStorage()->isLocal();
+		if ($useTempFile) {
+			// todo implement improt from external or encrypted storage
+			throw new \Exception("External or Encrypted files are not supported");
+			// $absPath = \OC::$server->getTempManager()->getTemporaryFile();
+			// $content = $file->fopen('r');
+			// file_put_contents($absPath, $content);
+			// $this->tmpFiles[] = $absPath;
+			// return $absPath;
+		} else {
+			return $file->getStorage()->getLocalFile($file->getInternalPath());
+		}
+	}
+
+	public function getFile(int $fileId)
+	{
+		return $this->getLocalFile($this->rootFolder->getUserFolder($this->userId)->getById($fileId)[0]);
 	}
 
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function gadgetbridge(string $fileId) {
-		return new JSONResponse(['userId' => $this->userId]);
+	public function gadgetbridge(int $fileId, int $personId = 1)
+	{
+		$db = new \SQLite3($this->getFile($fileId));
+		$rows = $db->query('select * from "MI_BAND_ACTIVITY_SAMPLE"');
+		while ($result = $rows->fetchArray(SQLITE3_ASSOC)) {
+			if ($this->isHearthbeatMesurement($result)) {
+				$this->createHearthbeatMesurement(
+					$personId, $this->createDateTimeFromTimestamp($result['TIMESTAMP']),
+					$result['HEART_RATE']
+				);
+			}
+			if ($this->isStepMeasurement($result)) {
+				$this->createActivityStep(
+					$personId, $this->createDateTimeFromTimestamp($result['TIMESTAMP']),
+					$result['STEPS']
+				);
+			}
+		}
+
+		return new JSONResponse([
+			'userId' => $this->userId,
+			'fileId' => $fileId,
+			'path' => $this->getFile($fileId),
+		]);
+	}
+
+	private function isStepMeasurement($result): bool
+	{
+		return ($result['STEPS'] > 0);
+	}
+
+	private function isHearthbeatMesurement($result): bool
+	{
+		return ($result['HEART_RATE'] < 255 && $result['HEART_RATE'] > 20);
+	}
+
+	private function createHearthbeatMesurement(
+		int $personId, \DateTime $dateTime,
+		int $hearthbeat): void
+	{
+		if (!$this->measurementdataService->exists($personId, $dateTime)) {
+			$this->measurementdataService->create(
+				$personId,
+				$this->formatDateTime($dateTime),
+				null,
+				$hearthbeat,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+			);
+		}
+
+	}
+
+	private function createDateTimeFromTimestamp(int $timestamp): \DateTime
+	{
+		return new \DateTime("@" . $timestamp);
+	}
+
+	private function formatDateTime(\DateTime $dateTime): string
+	{
+		return $dateTime->format(DATE_ATOM);
+	}
+
+	private function createActivityStep(int $personId, \DateTime $dateTime, $steps)
+	{
+		if (!$this->activityDataService->exists($personId, $dateTime)) {
+			$this->activityDataService->create(
+				$personId,
+				$this->formatDateTime($dateTime),
+				null,
+				null,
+				null,
+				null,
+				null,
+				$steps,
+				null
+			);
+		}
+
 	}
 }

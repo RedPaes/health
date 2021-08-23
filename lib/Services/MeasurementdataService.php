@@ -28,17 +28,20 @@ use DateTime;
 use Exception;
 use OCA\Health\Db\Measurementdata;
 use OCA\Health\Db\MeasurementdataMapper;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Http;
 
-class MeasurementdataService {
+class MeasurementdataService
+{
 
 	protected $measurementdataMapper;
 	protected $userId;
 	protected $formatHelperService;
 	protected $permissionService;
 
-	public function __construct($userId, MeasurementdataMapper $mdM, FormatHelperService $fhS, PermissionService $permissionService) {
+	public function __construct($userId, MeasurementdataMapper $mdM, FormatHelperService $fhS, PermissionService $permissionService)
+	{
 		$this->userId = $userId;
 		$this->measurementdataMapper = $mdM;
 		$this->formatHelperService = $fhS;
@@ -47,7 +50,7 @@ class MeasurementdataService {
 
 	public function getAllByPersonId($personId): ?array
 	{
-		if( !$this->permissionService->personData($personId, $this->userId)) {
+		if (!$this->permissionService->personData($personId, $this->userId)) {
 			return null;
 		}
 		return $this->measurementdataMapper->findAll($personId);
@@ -73,7 +76,7 @@ class MeasurementdataService {
 	 */
 	public function create($personId, $datetime, $temperature, $heartRate, $bloodPressureSystolic, $bloodPressureDiastolic, $bloodSugar, $oxygenSaturation, $defecation, $appetite, $allergies, $cigarettes, $alcohol, $comment): ?Entity
 	{
-		if( !$this->permissionService->personData($personId, $this->userId)) {
+		if (!$this->permissionService->personData($personId, $this->userId)) {
 			return null;
 		}
 		try {
@@ -100,15 +103,16 @@ class MeasurementdataService {
 		return $this->measurementdataMapper->insert($d);
 	}
 
-	public function delete($id) {
-		if( !$this->permissionService->measurementData($id, $this->userId)) {
+	public function delete($id)
+	{
+		if (!$this->permissionService->measurementData($id, $this->userId)) {
 			return null;
 		}
 		try {
 			$md = $this->measurementdataMapper->find($id);
 			return $this->measurementdataMapper->delete($md);
-        } catch(Exception $e) {
-             return Http::STATUS_NOT_FOUND;
+		} catch (Exception $e) {
+			return Http::STATUS_NOT_FOUND;
 		}
 	}
 
@@ -132,7 +136,7 @@ class MeasurementdataService {
 	 */
 	public function update($id, $datetime, $temperature, $heartRate, $bloodPressureSystolic, $bloodPressureDiastolic, $bloodSugar, $oxygenSaturation, $defecation, $appetite, $allergies, $cigarettes, $alcohol, $comment): ?Entity
 	{
-		if( !$this->permissionService->measurementData($id, $this->userId)) {
+		if (!$this->permissionService->measurementData($id, $this->userId)) {
 			return null;
 		}
 		try {
@@ -155,9 +159,20 @@ class MeasurementdataService {
 			$d->setCigarettes($cigarettes);
 			$d->setAlcohol($alcohol);
 			$d->setComment($comment);
-        } catch(Exception $e) {
-             return Http::STATUS_NOT_FOUND;
+		} catch (Exception $e) {
+			return Http::STATUS_NOT_FOUND;
 		}
 		return $this->measurementdataMapper->update($d);
+	}
+
+	public function exists(int $personId, DateTime $dateTime): bool
+	{
+
+		try {
+			$this->measurementdataMapper->findByDateTime($personId, $dateTime);
+			return true;
+		} catch (DoesNotExistException $exception) {
+			return false;
+		}
 	}
 }

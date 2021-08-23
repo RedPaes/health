@@ -29,21 +29,23 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\QBMapper;
 
-class MeasurementdataMapper extends QBMapper {
+class MeasurementdataMapper extends QBMapper
+{
 
-    public function __construct(IDBConnection $db) {
-        parent::__construct($db, 'health_measurementdata', Measurementdata::class);
-    }
-
-    public function find(int $id): ?Entity
+	public function __construct(IDBConnection $db)
 	{
-        $qb = $this->db->getQueryBuilder();
+		parent::__construct($db, 'health_measurementdata', Measurementdata::class);
+	}
 
-                    $qb->select('*')
-                             ->from($this->getTableName())
-                             ->where(
-                                     $qb->expr()->eq('id', $qb->createNamedParameter($id))
-                             );
+	public function find(int $id): ?Entity
+	{
+		$qb = $this->db->getQueryBuilder();
+
+		$qb->select('*')
+			->from($this->getTableName())
+			->where(
+				$qb->expr()->eq('id', $qb->createNamedParameter($id))
+			);
 
 		try {
 			return $this->findEntity($qb);
@@ -52,17 +54,47 @@ class MeasurementdataMapper extends QBMapper {
 		}
 	}
 
-    public function findAll(int $personId): array
+	public function findAll(int $personId): array
 	{
-        $qb = $this->db->getQueryBuilder();
+		$qb = $this->db->getQueryBuilder();
 
-        $qb->select('*')
-           ->from($this->getTableName())
-           ->where(
-            $qb->expr()->eq('person_id', $qb->createNamedParameter($personId))
-           );
+		$qb->select('*')
+			->from($this->getTableName())
+			->where(
+				$qb->expr()->eq('person_id', $qb->createNamedParameter($personId))
+			);
 
-        return $this->findEntities($qb);
-    }
+		return $this->findEntities($qb);
+	}
+
+	/**
+	 * @param int $personId
+	 * @param \DateTime $dateTime
+	 * @return Entity
+	 * @throws DoesNotExistException
+	 * @throws MultipleObjectsReturnedException
+	 */
+	public function findByDateTime(int $personId, \DateTime $dateTime): Entity
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->getTableName())
+			->where(
+				$qb->expr()->eq('datetime', $qb->createNamedParameter($dateTime, $qb::PARAM_DATE))
+			)->andWhere(
+				$qb->expr()->eq('person_id', $qb->createNamedParameter($personId))
+			);
+		return $this->findEntity($qb);
+	}
+
+	// todo remove
+	public function deleteAll()
+	{
+		foreach ($this->findAll(1) as $value) {
+			$this->delete($value);
+
+		};
+		die;
+	}
 
 }

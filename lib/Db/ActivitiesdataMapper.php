@@ -59,4 +59,16 @@ class ActivitiesdataMapper extends QBMapper {
         return $this->findEntities($qb);
     }
 
+	public function findByDateTime(int $personId, \DateTime $dateTime): Entity
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')
+			->from($this->getTableName())
+			->where(
+				$qb->expr()->eq('datetime', $qb->createNamedParameter($dateTime, $qb::PARAM_DATE))
+			)->andWhere(
+				$qb->expr()->eq('person_id', $qb->createNamedParameter($personId))
+			);
+		return $this->findEntity($qb);
+	}
 }

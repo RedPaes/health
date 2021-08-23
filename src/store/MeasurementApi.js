@@ -38,7 +38,7 @@ export class MeasurementApi {
 				},
 				(err) => {
 					return Promise.reject(err)
-				}
+				},
 			)
 			.catch((err) => {
 				return Promise.reject(err)
@@ -54,7 +54,7 @@ export class MeasurementApi {
 				},
 				(err) => {
 					return Promise.reject(err)
-				}
+				},
 			)
 			.catch((err) => {
 				return Promise.reject(err)
@@ -70,7 +70,7 @@ export class MeasurementApi {
 				},
 				(err) => {
 					return Promise.reject(err)
-				}
+				},
 			)
 			.catch((err) => {
 				return Promise.reject(err)
@@ -85,7 +85,7 @@ export class MeasurementApi {
 				},
 				(err) => {
 					return Promise.reject(err)
-				}
+				},
 			)
 			.catch((err) => {
 				return Promise.reject(err)

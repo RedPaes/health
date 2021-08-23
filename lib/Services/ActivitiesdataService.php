@@ -28,17 +28,20 @@ use DateTime;
 use Exception;
 use OCA\Health\Db\Activitiesdata;
 use OCA\Health\Db\ActivitiesdataMapper;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Http;
 
-class ActivitiesdataService {
+class ActivitiesdataService
+{
 
 	protected $activitiesdataMapper;
 	protected $userId;
 	protected $formatHelperService;
 	protected $permissionService;
 
-	public function __construct($userId, ActivitiesdataMapper $adM, FormatHelperService $fhS, PermissionService $permissionService) {
+	public function __construct($userId, ActivitiesdataMapper $adM, FormatHelperService $fhS, PermissionService $permissionService)
+	{
 		$this->userId = $userId;
 		$this->activitiesdataMapper = $adM;
 		$this->formatHelperService = $fhS;
@@ -47,7 +50,7 @@ class ActivitiesdataService {
 
 	public function getAllByPersonId($personId): ?array
 	{
-		if( !$this->permissionService->personData($personId, $this->userId)) {
+		if (!$this->permissionService->personData($personId, $this->userId)) {
 			return null;
 		}
 		return $this->activitiesdataMapper->findAll($personId);
@@ -68,7 +71,7 @@ class ActivitiesdataService {
 	 */
 	public function create($personId, $datetime, $calories, $duration, $category, $feeling, $intensity, $distance, $comment): ?Entity
 	{
-		if( !$this->permissionService->personData($personId, $this->userId)) {
+		if (!$this->permissionService->personData($personId, $this->userId)) {
 			return null;
 		}
 		try {
@@ -89,15 +92,16 @@ class ActivitiesdataService {
 		return $this->activitiesdataMapper->insert($d);
 	}
 
-	public function delete($id) {
-		if( !$this->permissionService->smokingData($id, $this->userId)) {
+	public function delete($id)
+	{
+		if (!$this->permissionService->smokingData($id, $this->userId)) {
 			return null;
 		}
 		try {
 			$md = $this->activitiesdataMapper->find($id);
 			return $this->activitiesdataMapper->delete($md);
-        } catch(Exception $e) {
-             return Http::STATUS_NOT_FOUND;
+		} catch (Exception $e) {
+			return Http::STATUS_NOT_FOUND;
 		}
 	}
 
@@ -116,7 +120,7 @@ class ActivitiesdataService {
 	 */
 	public function update($id, $datetime, $calories, $duration, $category, $feeling, $intensity, $distance, $comment): ?Entity
 	{
-		if( !$this->permissionService->smokingData($id, $this->userId)) {
+		if (!$this->permissionService->smokingData($id, $this->userId)) {
 			return null;
 		}
 		try {
@@ -134,9 +138,20 @@ class ActivitiesdataService {
 			$d->setIntensity($intensity);
 			$d->setDistance($distance);
 			$d->setComment($comment);
-		} catch(Exception $e) {
-             return Http::STATUS_NOT_FOUND;
+		} catch (Exception $e) {
+			return Http::STATUS_NOT_FOUND;
 		}
 		return $this->activitiesdataMapper->update($d);
 	}
+
+	public function exists(int $personId, DateTime $dateTime): bool
+	{
+		try {
+			$this->activitiesdataMapper->findByDateTime($personId, $dateTime);
+			return true;
+		} catch (DoesNotExistException $exception) {
+			return false;
+		}
+	}
+
 }

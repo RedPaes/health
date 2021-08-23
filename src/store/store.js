@@ -29,6 +29,7 @@ import { FeelingApi } from './FeelingApi'
 import { SleepApi } from './SleepApi'
 import { SmokingApi } from './SmokingApi'
 import { ActivitiesApi } from './ActivitiesApi'
+import { ImportApiClient } from './ImportApi'
 import { showSuccess } from '@nextcloud/dialogs'
 
 Vue.use(Vuex)
@@ -56,6 +57,7 @@ export default new Vuex.Store({
 		sleepDatasets: [],
 		smokingDatasets: [],
 		activitiesDatasets: [],
+		importConfig: {}
 	},
 	getters: {
 		person: state => (state.persons && state.persons[state.activePersonId]) ? state.persons[state.activePersonId] : null,
@@ -437,9 +439,9 @@ export default new Vuex.Store({
 			commit('activitiesDatasetsDelete', o)
 		},
 		async triggerImport({ commit, getters }, set) {
-			const o = await activitiesApiClient.deleteSet(set)
+			const o = await importApiClient.importGadgedbridge(set)
 			// console.debug('returned o', o)
-			commit('activitiesDatasetsDelete', o)
+			commit('triggerImport', o)
 		},
 	},
 })

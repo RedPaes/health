@@ -30,8 +30,8 @@ export class ImportApiClient {
 		return generateUrl(url)
 	}
 
-	findDatasetsByPerson(fileId) {
-		return axios.post(this.url(`/gadgetbridge//${fileId}`))
+	importGadgedbridge(fileId) {
+		return axios.post(this.url(`/gadgetbridge/${fileId}`))
 			.then(
 				(response) => {
 					return Promise.resolve(response.data)
