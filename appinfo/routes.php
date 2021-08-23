@@ -67,6 +67,6 @@ return [
 		['name' => 'activitiesdata#update',	'url' => '/activities/dataset/{id}',	'verb' => 'PUT'],
 
 		// import
-		['name' => 'import#gadgetbridge',	'url' => '/import/gadgetbridge/{fileId}',	'verb' => 'POST'],
+		['name' => 'import#gadgetbridge',	'url' => '/import/gadgetbridge/person/{personId}',	'verb' => 'POST'],
 	]
 ];

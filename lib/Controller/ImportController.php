@@ -40,11 +40,12 @@ class ImportController extends Controller
 	protected $rootFolder;
 	protected $measurementdataService;
 	protected $activityDataService;
+
 	public function __construct($appName,
 								IRequest $request,
 								IRootFolder $rootFolder,
 								MeasurementdataService $measurementdataService,
-								ActivitiesdataService  $activitiesdataService,
+								ActivitiesdataService $activitiesdataService,
 								$userId)
 	{
 		parent::__construct($appName, $request);
@@ -70,18 +71,18 @@ class ImportController extends Controller
 		}
 	}
 
-	public function getFile(int $fileId)
+	public function getFile(string $filePath)
 	{
-		return $this->getLocalFile($this->rootFolder->getUserFolder($this->userId)->getById($fileId)[0]);
+		return $this->getLocalFile($this->rootFolder->getUserFolder($this->userId)->get($filePath));
 	}
 
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function gadgetbridge(int $fileId, int $personId = 1)
+	public function gadgetbridge(int $personId, string $filePath)
 	{
-		$db = new \SQLite3($this->getFile($fileId));
+		$db = new \SQLite3($this->getFile($filePath));
 		$rows = $db->query('select * from "MI_BAND_ACTIVITY_SAMPLE"');
 		while ($result = $rows->fetchArray(SQLITE3_ASSOC)) {
 			if ($this->isHearthbeatMesurement($result)) {
@@ -100,8 +101,9 @@ class ImportController extends Controller
 
 		return new JSONResponse([
 			'userId' => $this->userId,
-			'fileId' => $fileId,
-			'path' => $this->getFile($fileId),
+			'fileId' => $filePath,
+			'personId' => $personId,
+			'path' => $this->getFile($filePath),
 		]);
 	}
 

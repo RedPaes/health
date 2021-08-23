@@ -30,8 +30,10 @@ export class ImportApiClient {
 		return generateUrl(url)
 	}
 
-	importGadgedbridge(fileId) {
-		return axios.post(this.url(`/gadgetbridge/${fileId}`))
+	importGadgedbridge(filePath, personId) {
+		return axios.post(this.url('/gadgetbridge/person/' + personId), {
+			filePath,
+		})
 			.then(
 				(response) => {
 					return Promise.resolve(response.data)

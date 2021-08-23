@@ -64,9 +64,6 @@ export default {
 				value: this.$refs.mission.value,
 			})
 		},
-		triggerImport() {
-			this.$store.dispatch('triggerImport')
-		},
 	},
 }
 </script>

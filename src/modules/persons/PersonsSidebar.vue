@@ -129,7 +129,7 @@
 		<ActionButton
 			v-if="person"
 			icon="icon-add"
-			@click="shareFromFiles()">
+			@click="importFromGadgedBridgeBackup()">
 			{{ t('health', 'Import') }}
 		</ActionButton>
 	</ul>
@@ -143,7 +143,7 @@ import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
 import { mapState, mapGetters } from 'vuex'
 import { getFilePickerBuilder } from '@nextcloud/dialogs'
 
-const picker = getFilePickerBuilder(t('deck', 'File to share'))
+const picker = getFilePickerBuilder(t('health', 'File to import'))
 	.setMultiSelect(false)
 	.setModal(true)
 	.setType(1)
@@ -181,11 +181,13 @@ export default {
 				value: sex,
 			})
 		},
-		shareFromFiles() {
+		importFromGadgedBridgeBackup() {
 			picker.pick()
 				.then(async(path) => {
-					console.debug(`path ${path} selected`)
-					// this.$store.dispatch('fetchAttachments')
+					this.$store.dispatch('triggerImport', {
+						filePath: path,
+						personId: this.person.id,
+					})
 				})
 		},
 	},

@@ -520,12 +520,13 @@ export default new Store({
 			commit('activitiesDatasetsDelete', o)
 		},
 		async triggerImport({
+			dispatch,
 			commit,
 			getters,
 		}, set) {
-			const o = await importApiClient.importGadgedbridge(set)
+			await importApiClient.importGadgedbridge(set.filePath, set.personId)
 			// console.debug('returned o', o)
-			commit('triggerImport', o)
+			dispatch('loadModuleContentForPerson')
 		},
 	},
 })
