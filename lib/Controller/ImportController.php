@@ -82,6 +82,7 @@ class ImportController extends Controller
 	 */
 	public function gadgetbridge(int $personId, string $filePath)
 	{
+		// todo add validation for the file, at least a decent error...
 		$db = new \SQLite3($this->getFile($filePath));
 		$rows = $db->query('select * from "MI_BAND_ACTIVITY_SAMPLE"');
 		while ($result = $rows->fetchArray(SQLITE3_ASSOC)) {
