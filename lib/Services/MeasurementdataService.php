@@ -167,7 +167,6 @@ class MeasurementdataService
 
 	public function exists(int $personId, DateTime $dateTime): bool
 	{
-
 		try {
 			$this->measurementdataMapper->findByDateTime($personId, $dateTime);
 			return true;

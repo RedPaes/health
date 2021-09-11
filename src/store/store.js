@@ -57,11 +57,12 @@ export default new Store({
 		sleepDatasets: [],
 		smokingDatasets: [],
 		activitiesDatasets: [],
-		importConfig: {},
+		hasImportJob: false,
 	},
 	getters: {
 		person: state => (state.persons && state.persons[state.activePersonId]) ? state.persons[state.activePersonId] : null,
 		personsLength: state => state.persons ? state.persons.length : 0,
+		hasImportJob: state => state.hasImportJob
 	},
 	mutations: {
 		persons(state, persons) {
@@ -90,6 +91,9 @@ export default new Store({
 		},
 		activeModule(state, module) {
 			state.activeModule = module
+		},
+		hasImportJob(state, bool) {
+			state.hasImportJob = bool
 		},
 		personData(state, data) {
 			state.personData = data
@@ -286,6 +290,7 @@ export default new Store({
 			commit('measurementDatasets', [])
 			commit('smokingDatasets', [])
 			commit('activitiesDatasets', [])
+			await dispatch('hasImportJob', getters.person.id)
 			if (state.activeModule === 'weight') {
 				await dispatch('weightDatasetsLoadByPerson', getters.person.id)
 			} else if (state.activeModule === 'measurement') {
@@ -519,14 +524,23 @@ export default new Store({
 			// console.debug('returned o', o)
 			commit('activitiesDatasetsDelete', o)
 		},
-		async triggerImport({
+		async addImportJob({
 			dispatch,
 			commit,
 			getters,
 		}, set) {
-			await importApiClient.importGadgedbridge(set.filePath, set.personId)
+			await importApiClient.addImportJob(set.filePath, set.personId)
 			// console.debug('returned o', o)
+			dispatch('hasImportJob', true)
 			dispatch('loadModuleContentForPerson')
+		},
+		async hasImportJob({
+			commit,
+			getters,
+		}, set) {
+			const o = await importApiClient.hasImportJob(getters.person.id)
+			// console.debug('returned o', o)
+			commit('hasImportJob', o)
 		},
 	},
 })

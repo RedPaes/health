@@ -67,6 +67,7 @@ return [
 		['name' => 'activitiesdata#update',	'url' => '/activities/dataset/{id}',	'verb' => 'PUT'],
 
 		// import
-		['name' => 'import#gadgetbridge',	'url' => '/import/gadgetbridge/person/{personId}',	'verb' => 'POST'],
+		['name' => 'import#createInportJob',	'url' => '/import/person/{personId}',	'verb' => 'POST'],
+		['name' => 'import#hasImportJob',	'url' => '/import/person/{personId}/hasImportJob',	'verb' => 'GET'],
 	]
 ];

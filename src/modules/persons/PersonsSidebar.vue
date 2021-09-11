@@ -54,7 +54,7 @@
 		<ActionInput
 			:value="person.currency"
 			icon="icon-rename"
-			@submit="$store.dispatch('setValue', { key: 'currency', value: $event.target[1].value })" />
+			@submit="$store.dispatch('setValue', { key: 'currency', value: $event.target[1].value })"/>
 		<li><h3>{{ t('health', 'Manage modules') }}</h3></li>
 		<ActionCheckbox
 			v-if="person"
@@ -126,10 +126,12 @@
 			@change="$store.dispatch('setValue', { key: 'enabledModuleSmoking', value: $event.target.checked })">
 			{{ t('health', 'Smoking') }}
 		</ActionCheckbox>
+		<p v-if="hasImportJob">Already configured</p>
+		<p v-if="!hasImportJob">Not configured</p>
 		<ActionButton
 			v-if="person"
 			icon="icon-add"
-			@click="importFromGadgedBridgeBackup()">
+			@click="addImportJob()">
 			{{ t('health', 'Import') }}
 		</ActionButton>
 	</ul>
@@ -160,7 +162,7 @@ export default {
 	},
 	computed: {
 		...mapState(['activeModule', 'showSidebar', 'persons']),
-		...mapGetters(['person']),
+		...mapGetters(['person', 'hasImportJob']),
 	},
 	methods: {
 		updateAge(e) {
@@ -181,10 +183,10 @@ export default {
 				value: sex,
 			})
 		},
-		importFromGadgedBridgeBackup() {
+		addImportJob() {
 			picker.pick()
 				.then(async(path) => {
-					this.$store.dispatch('triggerImport', {
+					this.$store.dispatch('addImportJob', {
 						filePath: path,
 						personId: this.person.id,
 					})

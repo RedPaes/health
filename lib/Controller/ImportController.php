@@ -24,150 +24,62 @@ declare(strict_types=1);
 
 namespace OCA\Health\Controller;
 
-use OCA\Health\Services\ActivitiesdataService;
-use OCA\Health\Services\MeasurementdataService;
+use OCA\Health\Exception\ExceptionOnOpeningDatabase;
+use OCA\Health\Services\GadgedtbridgeImportService;
+use OCA\Health\Services\ImportJobService;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\Files\File;
-use OCP\Files\IRootFolder;
 use OCP\IRequest;
 use OCP\AppFramework\Controller;
 
 class ImportController extends Controller
 {
-
 	protected $userId;
-	protected $storage;
-	protected $rootFolder;
-	protected $measurementdataService;
-	protected $activityDataService;
+	private ImportJobService $importJobService;
+	private GadgedtbridgeImportService $gadgedtbridgeImportService;
 
 	public function __construct($appName,
+								ImportJobService $importJobService,
 								IRequest $request,
-								IRootFolder $rootFolder,
-								MeasurementdataService $measurementdataService,
-								ActivitiesdataService $activitiesdataService,
+								GadgedtbridgeImportService $gadgedtbridgeImportService,
 								$userId)
 	{
 		parent::__construct($appName, $request);
 		$this->userId = $userId;
-		$this->rootFolder = $rootFolder;
-		$this->measurementdataService = $measurementdataService;
-		$this->activityDataService = $activitiesdataService;
-	}
-
-	private function getLocalFile(File $file): string
-	{
-		$useTempFile = $file->isEncrypted() || !$file->getStorage()->isLocal();
-		if ($useTempFile) {
-			// todo implement improt from external or encrypted storage
-			throw new \Exception("External or Encrypted files are not supported");
-			// $absPath = \OC::$server->getTempManager()->getTemporaryFile();
-			// $content = $file->fopen('r');
-			// file_put_contents($absPath, $content);
-			// $this->tmpFiles[] = $absPath;
-			// return $absPath;
-		} else {
-			return $file->getStorage()->getLocalFile($file->getInternalPath());
-		}
-	}
-
-	public function getFile(string $filePath)
-	{
-		return $this->getLocalFile($this->rootFolder->getUserFolder($this->userId)->get($filePath));
+		$this->importJobService = $importJobService;
+		$this->gadgedtbridgeImportService = $gadgedtbridgeImportService;
 	}
 
 	/**
 	 * @NoAdminRequired
 	 * @NoCSRFRequired
 	 */
-	public function gadgetbridge(int $personId, string $filePath)
+	public function createInportJob(int $personId, string $filePath)
 	{
-		// todo add validation for the file, at least a decent error...
-		$db = new \SQLite3($this->getFile($filePath));
-		$rows = $db->query('select * from "MI_BAND_ACTIVITY_SAMPLE"');
-		while ($result = $rows->fetchArray(SQLITE3_ASSOC)) {
-			if ($this->isHearthbeatMesurement($result)) {
-				$this->createHearthbeatMesurement(
-					$personId, $this->createDateTimeFromTimestamp($result['TIMESTAMP']),
-					$result['HEART_RATE']
-				);
-			}
-			if ($this->isStepMeasurement($result)) {
-				$this->createActivityStep(
-					$personId, $this->createDateTimeFromTimestamp($result['TIMESTAMP']),
-					$result['STEPS']
-				);
-			}
+		try {
+			$this->gadgedtbridgeImportService->import($this->userId, $personId, $filePath);
+		} catch (ExceptionOnOpeningDatabase $exception) {
+			return new JSONResponse([
+				'error' => $exception->getMessage()
+			],
+			Http::STATUS_BAD_REQUEST);
 		}
-
+		$this->importJobService->addImportJob($this->userId, $personId, $filePath);
 		return new JSONResponse([
 			'userId' => $this->userId,
 			'fileId' => $filePath,
 			'personId' => $personId,
-			'path' => $this->getFile($filePath),
 		]);
 	}
 
-	private function isStepMeasurement($result): bool
+	/**
+	 * @NoAdminRequired
+	 * @NoCSRFRequired
+	 */
+	public function hasImportJob(int $personId)
 	{
-		return ($result['STEPS'] > 0);
+		return new JSONResponse([
+			'isConfigured' => !$this->importJobService->hasImportJobConfigured($this->userId, $personId)]);
 	}
 
-	private function isHearthbeatMesurement($result): bool
-	{
-		return ($result['HEART_RATE'] < 255 && $result['HEART_RATE'] > 20);
-	}
-
-	private function createHearthbeatMesurement(
-		int $personId, \DateTime $dateTime,
-		int $hearthbeat): void
-	{
-		if (!$this->measurementdataService->exists($personId, $dateTime)) {
-			$this->measurementdataService->create(
-				$personId,
-				$this->formatDateTime($dateTime),
-				null,
-				$hearthbeat,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-				null,
-			);
-		}
-
-	}
-
-	private function createDateTimeFromTimestamp(int $timestamp): \DateTime
-	{
-		return new \DateTime("@" . $timestamp);
-	}
-
-	private function formatDateTime(\DateTime $dateTime): string
-	{
-		return $dateTime->format(DATE_ATOM);
-	}
-
-	private function createActivityStep(int $personId, \DateTime $dateTime, $steps)
-	{
-		if (!$this->activityDataService->exists($personId, $dateTime)) {
-			$this->activityDataService->create(
-				$personId,
-				$this->formatDateTime($dateTime),
-				null,
-				null,
-				null,
-				null,
-				null,
-				$steps,
-				null
-			);
-		}
-
-	}
 }

@@ -30,8 +30,24 @@ export class ImportApiClient {
 		return generateUrl(url)
 	}
 
-	importGadgedbridge(filePath, personId) {
-		return axios.post(this.url('/gadgetbridge/person/' + personId), {
+	hasImportJob(personId) {
+		return axios.get(this.url('/person/' + personId + '/hasImportJob'))
+			.then(
+				(response) => {
+					return Promise.resolve(response.data.isConfigured)
+				},
+				(err) => {
+					return Promise.reject(err)
+				},
+			)
+			.catch((err) => {
+				return Promise.reject(err)
+			})
+
+	}
+
+	addImportJob(filePath, personId) {
+		return axios.post(this.url('/person/' + personId), {
 			filePath,
 		})
 			.then(
